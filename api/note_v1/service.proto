@@ -1,0 +1,25 @@
+syntax = "proto3";
+
+package note_v1;
+
+import "google/protobuf/timestamp.proto";
+
+option go_package = "github.com/olezhek28/auth/pkg/note_v1;note_v1";
+
+service NoteV1 {
+  rpc Create(CreateRequest) returns (CreateResponse);
+}
+
+message NoteInfo {
+  string title = 1;
+  string content = 2;
+  google.protobuf.Timestamp created_at = 3;
+}
+
+message CreateRequest {
+  NoteInfo info = 1;
+}
+
+message CreateResponse {
+  int64 id = 1;
+}
