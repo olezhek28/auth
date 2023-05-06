@@ -4,7 +4,7 @@ import (
 	"context"
 
 	sq "github.com/Masterminds/squirrel"
-	"github.com/jackc/pgx/v4/pgxpool"
+	"github.com/olezhek28/auth/internal/client/pg"
 	"github.com/olezhek28/auth/internal/model"
 )
 
@@ -14,15 +14,16 @@ const tableName = "note"
 
 type Repository interface {
 	Create(ctx context.Context, info *model.Info) (int64, error)
+	GetList(ctx context.Context) ([]*model.Note, error)
 }
 
 type repository struct {
-	pool *pgxpool.Pool
+	client pg.Client
 }
 
-func NewRepository(pool *pgxpool.Pool) *repository {
+func NewRepository(client pg.Client) *repository {
 	return &repository{
-		pool: pool,
+		client: client,
 	}
 }
 
@@ -38,7 +39,12 @@ func (r *repository) Create(ctx context.Context, info *model.Info) (int64, error
 		return 0, err
 	}
 
-	rows, err := r.pool.Query(ctx, query, v...)
+	q := pg.Query{
+		Name:     "note.Create",
+		QueryRaw: query,
+	}
+
+	rows, err := r.client.PG().QueryContext(ctx, q, v...)
 	if err != nil {
 		return 0, err
 	}
@@ -52,4 +58,28 @@ func (r *repository) Create(ctx context.Context, info *model.Info) (int64, error
 	}
 
 	return id, nil
+}
+
+func (r *repository) GetList(ctx context.Context) ([]*model.Note, error) {
+	builder := sq.Select("id", "title", "content", "created_at", "updated_at").
+		From(tableName).
+		PlaceholderFormat(sq.Dollar)
+
+	query, v, err := builder.ToSql()
+	if err != nil {
+		return nil, err
+	}
+
+	q := pg.Query{
+		Name:     "note.GetList",
+		QueryRaw: query,
+	}
+
+	var notes []*model.Note
+	err = r.client.PG().SelectContext(ctx, &notes, q, v...)
+	if err != nil {
+		return nil, err
+	}
+
+	return notes, nil
 }
