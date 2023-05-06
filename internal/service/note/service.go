@@ -11,6 +11,7 @@ var _ Service = (*service)(nil)
 
 type Service interface {
 	Create(ctx context.Context, info *model.Info) (int64, error)
+	GetList(ctx context.Context) ([]*model.Note, error)
 }
 
 type service struct {
