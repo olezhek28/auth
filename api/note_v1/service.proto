@@ -4,6 +4,7 @@ package note_v1;
 
 import "google/protobuf/timestamp.proto";
 import "google/protobuf/empty.proto";
+import "validate/validate.proto";
 
 option go_package = "github.com/olezhek28/auth/pkg/note_v1;note_v1";
 
@@ -13,7 +14,7 @@ service NoteV1 {
 }
 
 message NoteInfo {
-  string title = 1;
+  string title = 1 [(validate.rules).string.min_len = 3];
   string content = 2;
   google.protobuf.Timestamp created_at = 3;
 }
