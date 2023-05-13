@@ -6,6 +6,7 @@ import (
 
 	"github.com/olezhek28/auth/internal/closer"
 	"github.com/olezhek28/auth/internal/config"
+	"github.com/olezhek28/auth/internal/interceptor"
 	desc "github.com/olezhek28/auth/pkg/note_v1"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
@@ -64,7 +65,10 @@ func (a *App) initServiceProvider(_ context.Context) error {
 }
 
 func (a *App) initGRPCServer(ctx context.Context) error {
-	a.grpcServer = grpc.NewServer()
+	a.grpcServer = grpc.NewServer(
+		grpc.UnaryInterceptor(interceptor.ValidateInterceptor),
+	)
+
 	reflection.Register(a.grpcServer)
 
 	desc.RegisterNoteV1Server(a.grpcServer, a.serviceProvider.GetNoteImpl(ctx))
