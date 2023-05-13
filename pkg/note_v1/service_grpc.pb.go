@@ -23,6 +23,7 @@ const _ = grpc.SupportPackageIsVersion7
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type NoteV1Client interface {
+	// Создает новую заметку
 	Create(ctx context.Context, in *CreateRequest, opts ...grpc.CallOption) (*CreateResponse, error)
 	GetList(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*GetListResponse, error)
 }
@@ -57,6 +58,7 @@ func (c *noteV1Client) GetList(ctx context.Context, in *emptypb.Empty, opts ...g
 // All implementations must embed UnimplementedNoteV1Server
 // for forward compatibility
 type NoteV1Server interface {
+	// Создает новую заметку
 	Create(context.Context, *CreateRequest) (*CreateResponse, error)
 	GetList(context.Context, *emptypb.Empty) (*GetListResponse, error)
 	mustEmbedUnimplementedNoteV1Server()
