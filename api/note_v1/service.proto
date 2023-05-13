@@ -5,11 +5,17 @@ package note_v1;
 import "google/protobuf/timestamp.proto";
 import "google/protobuf/empty.proto";
 import "validate/validate.proto";
+import "google/api/annotations.proto";
 
 option go_package = "github.com/olezhek28/auth/pkg/note_v1;note_v1";
 
 service NoteV1 {
-  rpc Create(CreateRequest) returns (CreateResponse);
+  rpc Create(CreateRequest) returns (CreateResponse) {
+    option (google.api.http) = {
+      post: "/note/v1/create"
+      body: "*"
+    };
+  }
   rpc GetList(google.protobuf.Empty) returns (GetListResponse);
 }
 

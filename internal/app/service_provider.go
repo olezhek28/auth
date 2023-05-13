@@ -16,6 +16,7 @@ import (
 type serviceProvider struct {
 	pgConfig   config.PGConfig
 	grpcConfig config.GRPCConfig
+	httpConfig config.HTTPConfig
 
 	pgClient       pg.Client
 	noteRepository noteRepository.Repository
@@ -52,6 +53,19 @@ func (s *serviceProvider) GetGRPCConfig() config.GRPCConfig {
 	}
 
 	return s.grpcConfig
+}
+
+func (s *serviceProvider) GetHTTPConfig() config.HTTPConfig {
+	if s.httpConfig == nil {
+		cfg, err := config.NewHTTPConfig()
+		if err != nil {
+			log.Fatalf("failed to get http config: %s", err.Error())
+		}
+
+		s.httpConfig = cfg
+	}
+
+	return s.httpConfig
 }
 
 func (s *serviceProvider) GetPgClient(ctx context.Context) pg.Client {
