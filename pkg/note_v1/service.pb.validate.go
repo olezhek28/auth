@@ -35,6 +35,236 @@ var (
 	_ = sort.Sort
 )
 
+// Validate checks the field values on ToDo with the rules defined in the proto
+// definition for this message. If any rules are violated, the first error
+// encountered is returned, or nil if there are no violations.
+func (m *ToDo) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on ToDo with the rules defined in the
+// proto definition for this message. If any rules are violated, the result is
+// a list of violation errors wrapped in ToDoMultiError, or nil if none found.
+func (m *ToDo) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *ToDo) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	for idx, item := range m.GetItems() {
+		_, _ = idx, item
+
+		if all {
+			switch v := interface{}(item).(type) {
+			case interface{ ValidateAll() error }:
+				if err := v.ValidateAll(); err != nil {
+					errors = append(errors, ToDoValidationError{
+						field:  fmt.Sprintf("Items[%v]", idx),
+						reason: "embedded message failed validation",
+						cause:  err,
+					})
+				}
+			case interface{ Validate() error }:
+				if err := v.Validate(); err != nil {
+					errors = append(errors, ToDoValidationError{
+						field:  fmt.Sprintf("Items[%v]", idx),
+						reason: "embedded message failed validation",
+						cause:  err,
+					})
+				}
+			}
+		} else if v, ok := interface{}(item).(interface{ Validate() error }); ok {
+			if err := v.Validate(); err != nil {
+				return ToDoValidationError{
+					field:  fmt.Sprintf("Items[%v]", idx),
+					reason: "embedded message failed validation",
+					cause:  err,
+				}
+			}
+		}
+
+	}
+
+	if len(errors) > 0 {
+		return ToDoMultiError(errors)
+	}
+
+	return nil
+}
+
+// ToDoMultiError is an error wrapping multiple validation errors returned by
+// ToDo.ValidateAll() if the designated constraints aren't met.
+type ToDoMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m ToDoMultiError) Error() string {
+	var msgs []string
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m ToDoMultiError) AllErrors() []error { return m }
+
+// ToDoValidationError is the validation error returned by ToDo.Validate if the
+// designated constraints aren't met.
+type ToDoValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e ToDoValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e ToDoValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e ToDoValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e ToDoValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e ToDoValidationError) ErrorName() string { return "ToDoValidationError" }
+
+// Error satisfies the builtin error interface
+func (e ToDoValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sToDo.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = ToDoValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = ToDoValidationError{}
+
+// Validate checks the field values on Marked with the rules defined in the
+// proto definition for this message. If any rules are violated, the first
+// error encountered is returned, or nil if there are no violations.
+func (m *Marked) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on Marked with the rules defined in the
+// proto definition for this message. If any rules are violated, the result is
+// a list of violation errors wrapped in MarkedMultiError, or nil if none found.
+func (m *Marked) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *Marked) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	if len(errors) > 0 {
+		return MarkedMultiError(errors)
+	}
+
+	return nil
+}
+
+// MarkedMultiError is an error wrapping multiple validation errors returned by
+// Marked.ValidateAll() if the designated constraints aren't met.
+type MarkedMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m MarkedMultiError) Error() string {
+	var msgs []string
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m MarkedMultiError) AllErrors() []error { return m }
+
+// MarkedValidationError is the validation error returned by Marked.Validate if
+// the designated constraints aren't met.
+type MarkedValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e MarkedValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e MarkedValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e MarkedValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e MarkedValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e MarkedValidationError) ErrorName() string { return "MarkedValidationError" }
+
+// Error satisfies the builtin error interface
+func (e MarkedValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sMarked.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = MarkedValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = MarkedValidationError{}
+
 // Validate checks the field values on NoteInfo with the rules defined in the
 // proto definition for this message. If any rules are violated, the first
 // error encountered is returned, or nil if there are no violations.
@@ -97,6 +327,93 @@ func (m *NoteInfo) validate(all bool) error {
 				cause:  err,
 			}
 		}
+	}
+
+	switch v := m.List.(type) {
+	case *NoteInfo_Todo:
+		if v == nil {
+			err := NoteInfoValidationError{
+				field:  "List",
+				reason: "oneof value cannot be a typed-nil",
+			}
+			if !all {
+				return err
+			}
+			errors = append(errors, err)
+		}
+
+		if all {
+			switch v := interface{}(m.GetTodo()).(type) {
+			case interface{ ValidateAll() error }:
+				if err := v.ValidateAll(); err != nil {
+					errors = append(errors, NoteInfoValidationError{
+						field:  "Todo",
+						reason: "embedded message failed validation",
+						cause:  err,
+					})
+				}
+			case interface{ Validate() error }:
+				if err := v.Validate(); err != nil {
+					errors = append(errors, NoteInfoValidationError{
+						field:  "Todo",
+						reason: "embedded message failed validation",
+						cause:  err,
+					})
+				}
+			}
+		} else if v, ok := interface{}(m.GetTodo()).(interface{ Validate() error }); ok {
+			if err := v.Validate(); err != nil {
+				return NoteInfoValidationError{
+					field:  "Todo",
+					reason: "embedded message failed validation",
+					cause:  err,
+				}
+			}
+		}
+
+	case *NoteInfo_Marked:
+		if v == nil {
+			err := NoteInfoValidationError{
+				field:  "List",
+				reason: "oneof value cannot be a typed-nil",
+			}
+			if !all {
+				return err
+			}
+			errors = append(errors, err)
+		}
+
+		if all {
+			switch v := interface{}(m.GetMarked()).(type) {
+			case interface{ ValidateAll() error }:
+				if err := v.ValidateAll(); err != nil {
+					errors = append(errors, NoteInfoValidationError{
+						field:  "Marked",
+						reason: "embedded message failed validation",
+						cause:  err,
+					})
+				}
+			case interface{ Validate() error }:
+				if err := v.Validate(); err != nil {
+					errors = append(errors, NoteInfoValidationError{
+						field:  "Marked",
+						reason: "embedded message failed validation",
+						cause:  err,
+					})
+				}
+			}
+		} else if v, ok := interface{}(m.GetMarked()).(interface{ Validate() error }); ok {
+			if err := v.Validate(); err != nil {
+				return NoteInfoValidationError{
+					field:  "Marked",
+					reason: "embedded message failed validation",
+					cause:  err,
+				}
+			}
+		}
+
+	default:
+		_ = v // ensures v is used
 	}
 
 	if len(errors) > 0 {
@@ -698,3 +1015,106 @@ var _ interface {
 	Cause() error
 	ErrorName() string
 } = GetListResponseValidationError{}
+
+// Validate checks the field values on ToDoItem with the rules defined in the
+// proto definition for this message. If any rules are violated, the first
+// error encountered is returned, or nil if there are no violations.
+func (m *ToDoItem) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on ToDoItem with the rules defined in
+// the proto definition for this message. If any rules are violated, the
+// result is a list of violation errors wrapped in ToDoItemMultiError, or nil
+// if none found.
+func (m *ToDoItem) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *ToDoItem) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	// no validation rules for Text
+
+	// no validation rules for Done
+
+	if len(errors) > 0 {
+		return ToDoItemMultiError(errors)
+	}
+
+	return nil
+}
+
+// ToDoItemMultiError is an error wrapping multiple validation errors returned
+// by ToDoItem.ValidateAll() if the designated constraints aren't met.
+type ToDoItemMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m ToDoItemMultiError) Error() string {
+	var msgs []string
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m ToDoItemMultiError) AllErrors() []error { return m }
+
+// ToDoItemValidationError is the validation error returned by
+// ToDoItem.Validate if the designated constraints aren't met.
+type ToDoItemValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e ToDoItemValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e ToDoItemValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e ToDoItemValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e ToDoItemValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e ToDoItemValidationError) ErrorName() string { return "ToDoItemValidationError" }
+
+// Error satisfies the builtin error interface
+func (e ToDoItemValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sToDoItem.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = ToDoItemValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = ToDoItemValidationError{}

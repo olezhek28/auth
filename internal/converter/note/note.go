@@ -7,6 +7,11 @@ import (
 )
 
 func ToInfo(info *desc.NoteInfo) *model.Info {
+	switch info.GetList().(type) {
+	case *desc.NoteInfo_Todo:
+	case *desc.NoteInfo_Marked:
+	}
+
 	return &model.Info{
 		Title:     info.GetTitle(),
 		Content:   info.GetContent(),

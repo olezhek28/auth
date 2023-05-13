@@ -60,6 +60,17 @@
     }
   },
   "definitions": {
+    "ToDoitem": {
+      "type": "object",
+      "properties": {
+        "text": {
+          "type": "string"
+        },
+        "done": {
+          "type": "boolean"
+        }
+      }
+    },
     "note_v1CreateRequest": {
       "type": "object",
       "properties": {
@@ -85,6 +96,17 @@
           "items": {
             "type": "object",
             "$ref": "#/definitions/note_v1Note"
+          }
+        }
+      }
+    },
+    "note_v1Marked": {
+      "type": "object",
+      "properties": {
+        "items": {
+          "type": "array",
+          "items": {
+            "type": "string"
           }
         }
       }
@@ -116,10 +138,28 @@
           "type": "string",
           "title": "Содержимое заметки"
         },
+        "todo": {
+          "$ref": "#/definitions/note_v1ToDo"
+        },
+        "marked": {
+          "$ref": "#/definitions/note_v1Marked"
+        },
         "createdAt": {
           "type": "string",
           "format": "date-time",
           "title": "Дата создания заметки"
+        }
+      }
+    },
+    "note_v1ToDo": {
+      "type": "object",
+      "properties": {
+        "items": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/ToDoitem"
+          }
         }
       }
     },
