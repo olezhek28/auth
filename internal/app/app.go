@@ -12,7 +12,8 @@ import (
 	"github.com/olezhek28/auth/internal/closer"
 	"github.com/olezhek28/auth/internal/config"
 	"github.com/olezhek28/auth/internal/interceptor"
-	desc "github.com/olezhek28/auth/pkg/note_v1"
+	descAuthV1 "github.com/olezhek28/auth/pkg/auth_v1"
+	descNoteV1 "github.com/olezhek28/auth/pkg/note_v1"
 	_ "github.com/olezhek28/auth/statik"
 	"github.com/rakyll/statik/fs"
 	"github.com/rs/cors"
@@ -111,7 +112,8 @@ func (a *App) initGRPCServer(ctx context.Context) error {
 
 	reflection.Register(a.grpcServer)
 
-	desc.RegisterNoteV1Server(a.grpcServer, a.serviceProvider.GetNoteImpl(ctx))
+	descNoteV1.RegisterNoteV1Server(a.grpcServer, a.serviceProvider.GetNoteImpl(ctx))
+	descAuthV1.RegisterAuthV1Server(a.grpcServer, a.serviceProvider.GetAuthImpl(ctx))
 
 	return nil
 }
@@ -123,7 +125,7 @@ func (a *App) initHTTPServer(ctx context.Context) error {
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
 	}
 
-	err := desc.RegisterNoteV1HandlerFromEndpoint(ctx, mux, a.serviceProvider.GetGRPCConfig().Host(), opts)
+	err := descNoteV1.RegisterNoteV1HandlerFromEndpoint(ctx, mux, a.serviceProvider.GetGRPCConfig().Host(), opts)
 	if err != nil {
 		return err
 	}

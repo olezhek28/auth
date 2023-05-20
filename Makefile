@@ -29,7 +29,7 @@ generate-note-api:
 	--plugin=protoc-gen-go-grpc-gateway=bin/protoc-gen-go-grpc-gateway \
 	--openapiv2_out=allow_merge=true,merge_file_name=api:pkg/swagger \
 	--plugin=protoc-gen-openapiv2=bin/protoc-gen-openapiv2 \
-	api/note_v1/service.proto
+	api/note_v1/note.proto
 
 generate-auth-api:
 	mkdir -p pkg/auth_v1
@@ -38,7 +38,7 @@ generate-auth-api:
 	--plugin=protoc-gen-go=bin/protoc-gen-go \
 	--go-grpc_out=pkg/auth_v1 --go-grpc_opt=paths=source_relative \
 	--plugin=protoc-gen-go-grpc=bin/protoc-gen-go-grpc \
-	api/auth_v1/service.proto
+	api/auth_v1/auth.proto
 
 local-migration-status:
 	goose -dir ${LOCAL_MIGRATION_DIR} postgres ${LOCAL_MIGRATION_DSN} status -v

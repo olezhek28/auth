@@ -5,11 +5,14 @@ import (
 	"log"
 
 	"github.com/jackc/pgx/v4/pgxpool"
+	authV1 "github.com/olezhek28/auth/internal/api/auth_v1"
 	noteV1 "github.com/olezhek28/auth/internal/api/note_v1"
 	"github.com/olezhek28/auth/internal/client/pg"
 	"github.com/olezhek28/auth/internal/closer"
 	"github.com/olezhek28/auth/internal/config"
 	noteRepository "github.com/olezhek28/auth/internal/repository/note"
+	userRepository "github.com/olezhek28/auth/internal/repository/user"
+	authService "github.com/olezhek28/auth/internal/service/auth"
 	noteService "github.com/olezhek28/auth/internal/service/note"
 )
 
@@ -21,9 +24,12 @@ type serviceProvider struct {
 
 	pgClient       pg.Client
 	noteRepository noteRepository.Repository
+	userRepository userRepository.Repository
 	noteService    noteService.Service
+	authService    authService.Service
 
 	noteImpl *noteV1.Implementation
+	authImpl *authV1.Implementation
 }
 
 func newServiceProvider() *serviceProvider {
@@ -114,6 +120,14 @@ func (s *serviceProvider) GetNoteRepository(ctx context.Context) noteRepository.
 	return s.noteRepository
 }
 
+func (s *serviceProvider) GetUserRepository(ctx context.Context) userRepository.Repository {
+	if s.userRepository == nil {
+		s.userRepository = userRepository.NewRepository(s.GetPgClient(ctx))
+	}
+
+	return s.userRepository
+}
+
 func (s *serviceProvider) GetNoteService(ctx context.Context) noteService.Service {
 	if s.noteService == nil {
 		s.noteService = noteService.NewService(s.GetNoteRepository(ctx))
@@ -122,10 +136,26 @@ func (s *serviceProvider) GetNoteService(ctx context.Context) noteService.Servic
 	return s.noteService
 }
 
+func (s *serviceProvider) GetAuthService(ctx context.Context) authService.Service {
+	if s.authService == nil {
+		s.authService = authService.NewService(s.GetUserRepository(ctx))
+	}
+
+	return s.authService
+}
+
 func (s *serviceProvider) GetNoteImpl(ctx context.Context) *noteV1.Implementation {
 	if s.noteImpl == nil {
 		s.noteImpl = noteV1.NewImplementation(s.GetNoteService(ctx))
 	}
 
 	return s.noteImpl
+}
+
+func (s *serviceProvider) GetAuthImpl(ctx context.Context) *authV1.Implementation {
+	if s.authImpl == nil {
+		s.authImpl = authV1.NewImplementation(s.GetAuthService(ctx))
+	}
+
+	return s.authImpl
 }
