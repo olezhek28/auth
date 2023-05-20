@@ -21,6 +21,7 @@ type serviceProvider struct {
 	grpcConfig    config.GRPCConfig
 	httpConfig    config.HTTPConfig
 	swaggerConfig config.SwaggerConfig
+	authConfig    config.AuthConfig
 
 	pgClient       pg.Client
 	noteRepository noteRepository.Repository
@@ -88,6 +89,19 @@ func (s *serviceProvider) GetSwaggerConfig() config.SwaggerConfig {
 	return s.swaggerConfig
 }
 
+func (s *serviceProvider) GetAuthConfig() config.AuthConfig {
+	if s.authConfig == nil {
+		cfg, err := config.NewAuthConfig()
+		if err != nil {
+			log.Fatalf("failed to get auth config: %s", err.Error())
+		}
+
+		s.authConfig = cfg
+	}
+
+	return s.authConfig
+}
+
 func (s *serviceProvider) GetPgClient(ctx context.Context) pg.Client {
 	if s.pgClient == nil {
 		pgCfg, err := pgxpool.ParseConfig(s.GetPGConfig().DSN())
@@ -138,7 +152,10 @@ func (s *serviceProvider) GetNoteService(ctx context.Context) noteService.Servic
 
 func (s *serviceProvider) GetAuthService(ctx context.Context) authService.Service {
 	if s.authService == nil {
-		s.authService = authService.NewService(s.GetUserRepository(ctx))
+		s.authService = authService.NewService(
+			s.GetAuthConfig(),
+			s.GetUserRepository(ctx),
+		)
 	}
 
 	return s.authService
