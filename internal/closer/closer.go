@@ -1,7 +1,6 @@
 package closer
 
 import (
-	"context"
 	"log"
 	"os"
 	"os/signal"
@@ -80,7 +79,7 @@ func (c *Closer) CloseAll() {
 
 		for i := 0; i < cap(errs); i++ {
 			if err := <-errs; err != nil {
-				log.Println(context.Background(), "error returned from Closer: %v", err)
+				log.Println("error returned from Closer")
 			}
 		}
 	})
