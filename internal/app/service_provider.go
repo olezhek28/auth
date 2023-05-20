@@ -5,6 +5,7 @@ import (
 	"log"
 
 	"github.com/jackc/pgx/v4/pgxpool"
+	accessV1 "github.com/olezhek28/auth/internal/api/access_v1"
 	authV1 "github.com/olezhek28/auth/internal/api/auth_v1"
 	noteV1 "github.com/olezhek28/auth/internal/api/note_v1"
 	"github.com/olezhek28/auth/internal/client/pg"
@@ -12,6 +13,7 @@ import (
 	"github.com/olezhek28/auth/internal/config"
 	noteRepository "github.com/olezhek28/auth/internal/repository/note"
 	userRepository "github.com/olezhek28/auth/internal/repository/user"
+	accessService "github.com/olezhek28/auth/internal/service/access"
 	authService "github.com/olezhek28/auth/internal/service/auth"
 	noteService "github.com/olezhek28/auth/internal/service/note"
 )
@@ -28,9 +30,11 @@ type serviceProvider struct {
 	userRepository userRepository.Repository
 	noteService    noteService.Service
 	authService    authService.Service
+	accessService  accessService.Service
 
-	noteImpl *noteV1.Implementation
-	authImpl *authV1.Implementation
+	noteImpl   *noteV1.Implementation
+	authImpl   *authV1.Implementation
+	accessImpl *accessV1.Implementation
 }
 
 func newServiceProvider() *serviceProvider {
@@ -161,6 +165,14 @@ func (s *serviceProvider) GetAuthService(ctx context.Context) authService.Servic
 	return s.authService
 }
 
+func (s *serviceProvider) GetAccessService(ctx context.Context) accessService.Service {
+	if s.accessService == nil {
+		s.accessService = accessService.NewService()
+	}
+
+	return s.accessService
+}
+
 func (s *serviceProvider) GetNoteImpl(ctx context.Context) *noteV1.Implementation {
 	if s.noteImpl == nil {
 		s.noteImpl = noteV1.NewImplementation(s.GetNoteService(ctx))
@@ -175,4 +187,12 @@ func (s *serviceProvider) GetAuthImpl(ctx context.Context) *authV1.Implementatio
 	}
 
 	return s.authImpl
+}
+
+func (s *serviceProvider) GetAccessImpl(ctx context.Context) *accessV1.Implementation {
+	if s.accessImpl == nil {
+		s.accessImpl = accessV1.NewImplementation(s.GetAccessService(ctx))
+	}
+
+	return s.accessImpl
 }

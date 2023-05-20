@@ -12,6 +12,7 @@ import (
 	"github.com/olezhek28/auth/internal/closer"
 	"github.com/olezhek28/auth/internal/config"
 	"github.com/olezhek28/auth/internal/interceptor"
+	descAccessV1 "github.com/olezhek28/auth/pkg/access_v1"
 	descAuthV1 "github.com/olezhek28/auth/pkg/auth_v1"
 	descNoteV1 "github.com/olezhek28/auth/pkg/note_v1"
 	_ "github.com/olezhek28/auth/statik"
@@ -114,6 +115,7 @@ func (a *App) initGRPCServer(ctx context.Context) error {
 
 	descNoteV1.RegisterNoteV1Server(a.grpcServer, a.serviceProvider.GetNoteImpl(ctx))
 	descAuthV1.RegisterAuthV1Server(a.grpcServer, a.serviceProvider.GetAuthImpl(ctx))
+	descAccessV1.RegisterAccessV1Server(a.grpcServer, a.serviceProvider.GetAccessImpl(ctx))
 
 	return nil
 }
