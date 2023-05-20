@@ -11,6 +11,7 @@ import (
 	"github.com/olezhek28/auth/internal/client/pg"
 	"github.com/olezhek28/auth/internal/closer"
 	"github.com/olezhek28/auth/internal/config"
+	accessRepository "github.com/olezhek28/auth/internal/repository/access"
 	noteRepository "github.com/olezhek28/auth/internal/repository/note"
 	userRepository "github.com/olezhek28/auth/internal/repository/user"
 	accessService "github.com/olezhek28/auth/internal/service/access"
@@ -25,12 +26,14 @@ type serviceProvider struct {
 	swaggerConfig config.SwaggerConfig
 	authConfig    config.AuthConfig
 
-	pgClient       pg.Client
-	noteRepository noteRepository.Repository
-	userRepository userRepository.Repository
-	noteService    noteService.Service
-	authService    authService.Service
-	accessService  accessService.Service
+	pgClient         pg.Client
+	noteRepository   noteRepository.Repository
+	userRepository   userRepository.Repository
+	accessRepository accessRepository.Repository
+
+	noteService   noteService.Service
+	authService   authService.Service
+	accessService accessService.Service
 
 	noteImpl   *noteV1.Implementation
 	authImpl   *authV1.Implementation
@@ -146,6 +149,14 @@ func (s *serviceProvider) GetUserRepository(ctx context.Context) userRepository.
 	return s.userRepository
 }
 
+func (s *serviceProvider) GetAccessRepository(ctx context.Context) accessRepository.Repository {
+	if s.accessRepository == nil {
+		s.accessRepository = accessRepository.NewRepository(s.GetPgClient(ctx))
+	}
+
+	return s.accessRepository
+}
+
 func (s *serviceProvider) GetNoteService(ctx context.Context) noteService.Service {
 	if s.noteService == nil {
 		s.noteService = noteService.NewService(s.GetNoteRepository(ctx))
@@ -167,7 +178,10 @@ func (s *serviceProvider) GetAuthService(ctx context.Context) authService.Servic
 
 func (s *serviceProvider) GetAccessService(ctx context.Context) accessService.Service {
 	if s.accessService == nil {
-		s.accessService = accessService.NewService()
+		s.accessService = accessService.NewService(
+			s.GetAuthConfig(),
+			s.GetAccessRepository(ctx),
+		)
 	}
 
 	return s.accessService
