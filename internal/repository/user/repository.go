@@ -23,7 +23,7 @@ func NewRepository(client pg.Client) *repository {
 }
 
 func (r *repository) Get(ctx context.Context, username string) (*model.User, error) {
-	builder := sq.Select("username", "password").
+	builder := sq.Select("username", "password", "role").
 		PlaceholderFormat(sq.Dollar).
 		From("users").
 		Where(sq.Eq{"username": username}).

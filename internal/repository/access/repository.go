@@ -38,7 +38,7 @@ func (r *repository) GetList(ctx context.Context) ([]*model.AccessInfo, error) {
 	}
 
 	var accessInfo []*model.AccessInfo
-	err = r.client.PG().SelectContext(ctx, accessInfo, q, v...)
+	err = r.client.PG().SelectContext(ctx, &accessInfo, q, v...)
 	if err != nil {
 		return nil, err
 	}
