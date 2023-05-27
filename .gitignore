@@ -22,3 +22,10 @@ go.work
 
 bin/
 /vendor.protogen/
+
+ca.key
+ca.srl
+ca.cert
+service.csr
+service.key
+service.pem

@@ -3,13 +3,15 @@ package auth
 import (
 	"context"
 
+	"github.com/olezhek28/auth/internal/sys"
+	"github.com/olezhek28/auth/internal/sys/codes"
 	"github.com/olezhek28/auth/internal/utils"
 )
 
 func (s *service) GetAccessToken(ctx context.Context, refreshToken string) (string, error) {
 	claims, err := utils.VerifyToken(refreshToken, s.authConfig.RefreshTokenSecretKey())
 	if err != nil {
-		return "", err
+		return "", sys.NewCommonError("invalid refresh token", codes.Aborted)
 	}
 
 	userInfo, err := s.userRepository.Get(ctx, claims.Username)

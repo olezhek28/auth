@@ -287,16 +287,7 @@ func (m *NoteInfo) validate(all bool) error {
 
 	var errors []error
 
-	if utf8.RuneCountInString(m.GetTitle()) < 3 {
-		err := NoteInfoValidationError{
-			field:  "Title",
-			reason: "value length must be at least 3 runes",
-		}
-		if !all {
-			return err
-		}
-		errors = append(errors, err)
-	}
+	// no validation rules for Title
 
 	// no validation rules for Content
 

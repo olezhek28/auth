@@ -32,6 +32,13 @@ generate-note-api:
 	--plugin=protoc-gen-openapiv2=bin/protoc-gen-openapiv2 \
 	api/note_v1/note.proto
 
+generate-vk-api:
+	mkdir -p pkg/vk
+	protoc --proto_path api --proto_path vendor.protogen \
+	--openapiv2_out=allow_merge=true,merge_file_name=api:pkg/vk \
+	--plugin=protoc-gen-openapiv2=bin/protoc-gen-openapiv2 \
+	api/vk.proto
+
 generate-auth-api:
 	mkdir -p pkg/auth_v1
 	protoc --proto_path api/auth_v1 \
@@ -78,3 +85,22 @@ vendor-proto:
 			mv vendor.protogen/openapiv2/protoc-gen-openapiv2/options/*.proto vendor.protogen/protoc-gen-openapiv2/options &&\
 			rm -rf vendor.protogen/openapiv2 ;\
 		fi
+
+cert:
+	openssl genrsa -out ca.key 4096
+	openssl req -new -x509 -key ca.key -sha256 -subj "/C=US/ST=NJ/O=CA, Inc." -days 365 -out ca.cert
+	openssl genrsa -out service.key 4096
+	openssl req -new -key service.key -out service.csr -config certificate.conf
+	openssl x509 -req -in service.csr -CA ca.cert -CAkey ca.key -CAcreateserial \
+    		-out service.pem -days 365 -sha256 -extfile certificate.conf -extensions req_ext
+
+grpc-load-test:
+	ghz \
+		--proto api/note_v1/note.proto \
+		--import-paths=vendor.protogen \
+		--call note_v1.NoteV1.GetList \
+		--data '' \
+		--rps 100 \
+		--total 6000 \
+		--cacert=service.pem \
+		localhost:50051
