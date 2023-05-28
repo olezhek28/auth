@@ -3,6 +3,10 @@ package rate_limiter
 import (
 	"context"
 	"time"
+
+	grpc_retry "github.com/grpc-ecosystem/go-grpc-middleware/retry"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/codes"
 )
 
 type TokenBucketLimiter struct {
@@ -45,4 +49,16 @@ func (l *TokenBucketLimiter) Allow() bool {
 	default:
 		return false
 	}
+}
+
+func clientOpt() {
+	var opts []grpc.DialOption
+	opts = append(opts, grpc.WithUnaryInterceptor(grpc_retry.UnaryClientInterceptor(
+		grpc_retry.WithCodes(codes.Unavailable, codes.ResourceExhausted),
+		grpc_retry.WithMax(5),
+		grpc_retry.WithBackoff(grpc_retry.BackoffLinear(time.Second)),
+	)))
+	opts = append(opts, grpc.WithInsecure())
+
+	grpc.DialContext(context.Background(), "localhost:8080", opts...)
 }
