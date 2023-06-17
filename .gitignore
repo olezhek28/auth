@@ -29,3 +29,4 @@ ca.cert
 service.csr
 service.key
 service.pem
+.DS_Store
